@@ -19,6 +19,14 @@ class DocumentListCreateView(generics.ListCreateAPIView):
     queryset = Document.objects.all().order_by('-uploaded_at')
     serializer_class = DocumentSerializer
 
+    def create(self, request, *args, **kwargs):
+        is_bulk = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data, many=is_bulk)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data if not is_bulk else {})
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class DocumentChunksView(generics.ListAPIView):
     serializer_class = ChunkSerializer
