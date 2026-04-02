@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.views.generic import TemplateView
 
 from documents.models import Chunk, ConversationTurn, Document
 from documents.serializers import (
@@ -83,3 +84,7 @@ class ChatHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         return ConversationTurn.objects.filter(lead_id=self.kwargs['lead_id']).order_by('created_at')
+
+
+class WebSocketTestView(TemplateView):
+    template_name = 'documents/ws_test.html'

@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from documents.views import WebSocketTestView
 from .api import health_check
 
 urlpatterns = [
     path('health/', health_check, name='health-check'),
+    path('ws-test/', WebSocketTestView.as_view(), name='ws-test'),
     path('api/', include('documents.urls')),
     path('admin/', admin.site.urls),
 ]
