@@ -1,5 +1,0 @@
-- Chose `pgvector` in PostgreSQL over a separate vector database to reduce infrastructure complexity and keep transactional + vector data in one operational system.
-- Chose `sentence-transformers/all-MiniLM-L6-v2` over larger embedding models to balance retrieval quality with lower latency and compute cost for a proof-of-concept.
-- Chose fixed-size (~500 char) chunking with overlap over paragraph-only chunking to preserve context at boundaries and improve semantic recall for short sales questions.
-- chose to upload multiple documents in single api hit, over single to avoid repeatative overhead while testing
-- when developing the web socket channel, i choose to first make a minimal frontend component just to verify if my web socket server is accessible before moving onto making a nextJS appliction

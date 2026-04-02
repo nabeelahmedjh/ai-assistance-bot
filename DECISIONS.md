@@ -1,0 +1,7 @@
+- Chose `pgvector` in PostgreSQL over a standalone vector database to keep retrieval and transactional data in one system and reduce operational complexity.
+- Chose `sentence-transformers/all-MiniLM-L6-v2` over larger embedding models to balance quality, latency, and compute cost for a POC.
+- Chose fixed-size chunks (~500 chars) with overlap instead of paragraph-only chunking to preserve boundary context and improve short-query recall.
+- Chose bulk document upload support in `POST /api/documents/` to reduce repetitive ingestion setup during testing and demos.
+- Chose to expose a structured chat payload (`answer`, `citations`, `next_step`, `intent`, `handoff`) instead of plain text to make UI rendering and agent workflows easier.
+- Chose to validate WebSocket infrastructure first with a minimal browser test page, then implement the full Next.js widget.
+- Chose WebSocket token streaming with a controlled minimum duration so users perceive real-time response progress rather than instant full-text swaps.
