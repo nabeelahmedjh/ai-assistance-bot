@@ -1,0 +1,2 @@
+- Chosing pgvector to keep the system simple and production-aligned, avoiding external vector DB overhead while maintaining efficient similarity search
+- 
