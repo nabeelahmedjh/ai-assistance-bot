@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import Dict, List
 
+from documents.services.prompting import build_prompt
+from documents.services.retrieval import retrieve_context
+
 
 def classify_intent(message: str) -> str:
     text = message.lower()
@@ -59,3 +62,19 @@ def generate_structured_reply(query: str, context: List[Dict], intent: str) -> D
         'intent': intent,
         'handoff': intent == 'conversion',
     }
+
+
+def handle_message(message: str, lead_id: str, top_k: int = 3) -> Dict:
+    intent = classify_intent(message)
+    context = retrieve_context(message, top_k=top_k)
+    prompt = build_prompt(message, context)
+    payload = generate_structured_reply(message, context, intent)
+
+    if intent == 'pricing' and context:
+        payload['comparison_hint'] = (
+            'Offer a brief new vs one-trip vs cargo-worthy comparison before quoting.'
+        )
+
+    payload['lead_id'] = lead_id
+    payload['prompt_preview'] = prompt[:500]
+    return payload

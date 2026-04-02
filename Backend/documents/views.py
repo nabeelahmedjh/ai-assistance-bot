@@ -10,10 +10,8 @@ from documents.serializers import (
     ConversationTurnSerializer,
     DocumentSerializer,
 )
-from documents.services.chat import classify_intent, generate_structured_reply
+from documents.services.chat import classify_intent, handle_message
 from documents.services.ingestion import ingest_document
-from documents.services.prompting import build_prompt
-from documents.services.retrieval import retrieve_context
 
 
 class DocumentListCreateView(generics.ListCreateAPIView):
@@ -58,10 +56,7 @@ class AIChatView(APIView):
             intent=user_intent,
         )
 
-        context = retrieve_context(message, top_k=3)
-        prompt = build_prompt(message, context)
-        payload = generate_structured_reply(message, context, user_intent)
-        payload['prompt_preview'] = prompt[:500]
+        payload = handle_message(message, lead_id=lead_id, top_k=3)
 
         assistant_turn = ConversationTurn.objects.create(
             lead_id=lead_id,

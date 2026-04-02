@@ -5,9 +5,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from documents.models import ConversationTurn
-from documents.services.chat import classify_intent, generate_structured_reply
-from documents.services.prompting import build_prompt
-from documents.services.retrieval import retrieve_context
+from documents.services.chat import classify_intent, handle_message
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -56,10 +54,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         user_intent = await sync_to_async(classify_intent)(message)
         await self._create_user_turn(message=message, intent=user_intent)
 
-        context = await sync_to_async(retrieve_context)(message, 3)
-        prompt = await sync_to_async(build_prompt)(message, context)
-        payload = await sync_to_async(generate_structured_reply)(message, context, user_intent)
-        payload["prompt_preview"] = prompt[:500]
+        payload = await sync_to_async(handle_message)(message, self.lead_id, 3)
 
         assistant_turn_id = await self._create_assistant_turn(
             answer=payload["answer"],
