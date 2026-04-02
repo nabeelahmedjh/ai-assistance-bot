@@ -18,9 +18,26 @@ type HistoryTurn = {
 
 type SocketMessageEvent = {
   type: "message";
+  request_id?: string;
   response?: {
     answer?: string;
   };
+};
+
+type SocketStreamStartEvent = {
+  type: "stream_start";
+  request_id: string;
+};
+
+type SocketStreamTokenEvent = {
+  type: "stream_token";
+  request_id: string;
+  token: string;
+};
+
+type SocketStreamEndEvent = {
+  type: "stream_end";
+  request_id: string;
 };
 
 type SocketTypingEvent = {
@@ -33,7 +50,13 @@ type SocketErrorEvent = {
   error?: string;
 };
 
-type SocketPayload = SocketMessageEvent | SocketTypingEvent | SocketErrorEvent;
+type SocketPayload =
+  | SocketMessageEvent
+  | SocketTypingEvent
+  | SocketErrorEvent
+  | SocketStreamStartEvent
+  | SocketStreamTokenEvent
+  | SocketStreamEndEvent;
 
 type ChatWidgetProps = {
   leadId: string;
@@ -58,6 +81,7 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
   const socketRef = useRef<WebSocket | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const historyContainerRef = useRef<HTMLDivElement | null>(null);
+  const activeStreamIdRef = useRef<string | null>(null);
 
   const normalizedApi = useMemo(() => apiUrl.replace(/\/$/, ""), [apiUrl]);
   const normalizedWs = useMemo(() => wsUrl.replace(/\/$/, ""), [wsUrl]);
@@ -138,6 +162,38 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
         return;
       }
 
+      if (payload.type === "stream_start") {
+        const streamMessageId = `stream-${payload.request_id}`;
+        activeStreamIdRef.current = streamMessageId;
+        setAssistantTyping(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: streamMessageId,
+            role: "assistant",
+            text: "",
+          },
+        ]);
+        return;
+      }
+
+      if (payload.type === "stream_token") {
+        const streamMessageId = `stream-${payload.request_id}`;
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === streamMessageId
+              ? { ...message, text: `${message.text}${payload.token}` }
+              : message,
+          ),
+        );
+        return;
+      }
+
+      if (payload.type === "stream_end") {
+        setAssistantTyping(false);
+        return;
+      }
+
       if (payload.type === "error") {
         setMessages((prev) => [
           ...prev,
@@ -156,15 +212,27 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
           return;
         }
 
+        const streamMessageId = payload.request_id ? `stream-${payload.request_id}` : activeStreamIdRef.current;
+
         setAssistantTyping(false);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assistant-${Date.now()}`,
-            role: "assistant",
-            text: assistantText,
-          },
-        ]);
+        setMessages((prev) => {
+          if (streamMessageId && prev.some((item) => item.id === streamMessageId)) {
+            return prev.map((item) =>
+              item.id === streamMessageId ? { ...item, text: assistantText } : item,
+            );
+          }
+
+          return [
+            ...prev,
+            {
+              id: `assistant-${Date.now()}`,
+              role: "assistant",
+              text: assistantText,
+            },
+          ];
+        });
+
+        activeStreamIdRef.current = null;
       }
     };
 
