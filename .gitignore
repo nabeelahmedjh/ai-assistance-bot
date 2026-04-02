@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Django
+*.sqlite3
+media/
+staticfiles/
+
+# Env
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+.next/
+
+# Docker
+data/postgres/
