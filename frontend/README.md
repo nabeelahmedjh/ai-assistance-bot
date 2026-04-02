@@ -2,6 +2,12 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Set environment variables (optional, defaults are already wired in the app):
+
+```bash
+cp .env.local.example .env.local
+```
+
 First, run the development server:
 
 ```bash
@@ -15,6 +21,12 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+The chat page lets you choose a `leadId` at runtime and uses:
+
+- `NEXT_PUBLIC_API_URL` for REST calls (chat history)
+- `NEXT_PUBLIC_WS_URL` for WebSocket chat
+- `NEXT_PUBLIC_DEFAULT_LEAD_ID` for the pre-filled lead identifier
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

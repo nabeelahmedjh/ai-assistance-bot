@@ -1,65 +1,63 @@
-import Image from "next/image";
+"use client";
+
+import { FormEvent, useMemo, useState } from "react";
+
+import ChatWidget from "@/components/chat-widget";
 
 export default function Home() {
+  const defaultLeadId = process.env.NEXT_PUBLIC_DEFAULT_LEAD_ID || "lead-demo-1";
+  const [draftLeadId, setDraftLeadId] = useState(defaultLeadId);
+  const [activeLeadId, setActiveLeadId] = useState(defaultLeadId);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+  const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://127.0.0.1:8001";
+
+  const safeLeadId = useMemo(
+    () => activeLeadId.trim().replace(/[^a-zA-Z0-9_-]/g, ""),
+    [activeLeadId],
+  );
+
+  const onLeadSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const normalized = draftLeadId.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    if (!normalized) {
+      return;
+    }
+
+    setDraftLeadId(normalized);
+    setActiveLeadId(normalized);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="relative flex min-h-screen items-start justify-center overflow-x-hidden px-4 py-4 sm:items-center sm:py-8">
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[640px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(13,148,136,0.22),rgba(13,148,136,0))]" />
+      <div className="pointer-events-none absolute -bottom-44 right-0 h-[340px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.2),rgba(245,158,11,0))]" />
+
+      <div className="z-10 flex w-full max-w-3xl flex-col gap-3">
+        <form
+          onSubmit={onLeadSubmit}
+          className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white/85 p-3 shadow-[0_18px_40px_-30px_rgba(2,6,23,0.6)] backdrop-blur"
+        >
+          <label htmlFor="leadId" className="text-sm font-semibold text-slate-700">
+            Lead ID
+          </label>
+          <input
+            id="leadId"
+            value={draftLeadId}
+            onChange={(event) => setDraftLeadId(event.target.value)}
+            placeholder="lead-demo-1"
+            className="h-10 min-w-[220px] flex-1 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none ring-teal-500 transition focus:ring-2"
+          />
+          <button
+            type="submit"
+            className="h-10 rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-700"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            Start Chat
+          </button>
+        </form>
+
+        <ChatWidget key={safeLeadId} leadId={safeLeadId} apiUrl={apiUrl} wsUrl={wsUrl} />
+      </div>
+    </main>
   );
 }
