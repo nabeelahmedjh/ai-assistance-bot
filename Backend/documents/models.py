@@ -31,3 +31,23 @@ class Chunk(models.Model):
 
     def __str__(self) -> str:
         return f'{self.document_id}:{self.chunk_index}'
+
+
+class ConversationTurn(models.Model):
+    ROLE_CHOICES = (
+        ('user', 'User'),
+        ('assistant', 'Assistant'),
+    )
+
+    lead_id = models.CharField(max_length=128, db_index=True)
+    role = models.CharField(max_length=16, choices=ROLE_CHOICES)
+    message = models.TextField()
+    intent = models.CharField(max_length=32, default='general')
+    response_payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self) -> str:
+        return f'{self.lead_id}:{self.role}:{self.created_at.isoformat()}'

@@ -5,7 +5,6 @@ from functools import lru_cache
 from typing import List
 
 from django.db import transaction
-from sentence_transformers import SentenceTransformer
 
 from documents.models import Chunk, Document
 
@@ -22,7 +21,9 @@ class ChunkPayload:
 
 
 @lru_cache(maxsize=1)
-def get_embedding_model() -> SentenceTransformer:
+def get_embedding_model():
+    from sentence_transformers import SentenceTransformer
+
     return SentenceTransformer(EMBEDDING_MODEL_NAME)
 
 
