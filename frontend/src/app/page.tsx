@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
 
 import ChatWidget from "@/components/chat-widget";
 
@@ -34,6 +35,15 @@ export default function Home() {
       <div className="pointer-events-none absolute -bottom-44 right-0 h-[340px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.2),rgba(245,158,11,0))]" />
 
       <div className="z-10 flex w-full max-w-3xl flex-col gap-3">
+        <div className="flex justify-end">
+          <Link
+            href="/admin"
+            className="rounded-lg border border-slate-300 bg-white/85 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-700 transition hover:bg-slate-100"
+          >
+            Open Admin
+          </Link>
+        </div>
+
         <form
           onSubmit={onLeadSubmit}
           className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white/85 p-3 shadow-[0_18px_40px_-30px_rgba(2,6,23,0.6)] backdrop-blur"

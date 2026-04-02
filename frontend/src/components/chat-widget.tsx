@@ -52,6 +52,8 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
   const [inputValue, setInputValue] = useState("");
   const [status, setStatus] = useState("disconnected");
   const [assistantTyping, setAssistantTyping] = useState(false);
+  const [connectionIssue, setConnectionIssue] = useState<string | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
 
   const socketRef = useRef<WebSocket | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -95,17 +97,32 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
 
   useEffect(() => {
     const socketUrl = `${normalizedWs}/ws/chat/${encodeURIComponent(leadId)}/`;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let isActive = true;
 
     const socket = new WebSocket(socketUrl);
     socketRef.current = socket;
 
     socket.onopen = () => {
       setStatus("connected");
+      setConnectionIssue(null);
     };
 
     socket.onclose = () => {
       setStatus("disconnected");
       setAssistantTyping(false);
+
+      if (!isActive) {
+        return;
+      }
+
+      reconnectTimer = setTimeout(() => {
+        setRetryTick((prev) => prev + 1);
+      }, 1200);
+    };
+
+    socket.onerror = () => {
+      setConnectionIssue("WebSocket connection error. Retrying...");
     };
 
     socket.onmessage = (event) => {
@@ -152,13 +169,17 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
     };
 
     return () => {
+      isActive = false;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
       if (typingTimerRef.current) {
         clearTimeout(typingTimerRef.current);
       }
       socket.close();
       socketRef.current = null;
     };
-  }, [leadId, normalizedWs]);
+  }, [leadId, normalizedWs, retryTick]);
 
   useEffect(() => {
     const container = historyContainerRef.current;
@@ -234,6 +255,11 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
     emitTyping(false);
   };
 
+  const onRetryConnection = () => {
+    setConnectionIssue(null);
+    setRetryTick((prev) => prev + 1);
+  };
+
   return (
     <section className="w-full max-w-3xl rounded-3xl border border-slate-200 bg-white/90 shadow-[0_24px_80px_-40px_rgba(2,6,23,0.45)] backdrop-blur">
       <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
@@ -247,6 +273,19 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
           {status}
         </div>
       </header>
+
+      {status !== "connected" ? (
+        <div className="flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
+          <p>{connectionIssue || "Socket disconnected. Trying to reconnect..."}</p>
+          <button
+            type="button"
+            onClick={onRetryConnection}
+            className="rounded-md border border-amber-300 px-2 py-1 font-semibold transition hover:bg-amber-100"
+          >
+            Retry now
+          </button>
+        </div>
+      ) : null}
 
       <div
         ref={historyContainerRef}
@@ -298,6 +337,7 @@ export default function ChatWidget({ leadId, apiUrl, wsUrl }: ChatWidgetProps) {
           />
           <button
             type="submit"
+            disabled={status !== "connected"}
             className="h-12 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-700"
           >
             Send
