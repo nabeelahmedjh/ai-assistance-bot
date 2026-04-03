@@ -31,6 +31,12 @@ Run the full stack (PostgreSQL + backend + frontend):
 docker compose up --build
 ```
 
+Optional detached mode:
+
+```bash
+docker compose up --build -d
+```
+
 Open:
 
 - Chat page: `http://localhost:3000/`
@@ -42,11 +48,28 @@ Notes:
 - Backend runs via Daphne on port `8000` (HTTP + WebSocket on same port).
 - Compose sets frontend runtime env vars to use `localhost:8000`.
 - PostgreSQL is initialized with `pgvector` extension automatically on first boot.
+- PostgreSQL is published on host port `5433` (container port remains `5432`).
 
 Stop stack:
 
 ```bash
 docker compose down
+```
+
+## Demo Video
+
+- Demo recording: [demo-video.webm](demo-video.webm)
+- If your Markdown viewer supports HTML video tags:
+
+<video controls width="960">
+	<source src="demo-video.webm" type="video/webm">
+	Your browser does not support video playback. <a href="demo-video.webm">Open demo-video.webm</a>
+</video>
+
+- Demo run command:
+
+```bash
+docker compose up --build
 ```
 
 ## Backend Setup
