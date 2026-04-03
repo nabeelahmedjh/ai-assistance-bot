@@ -23,6 +23,32 @@ Proof-of-concept AI sales assistant for a shipping container company.
 - Node.js 22+
 - npm
 
+## Run With Docker Compose
+
+Run the full stack (PostgreSQL + backend + frontend):
+
+```bash
+docker compose up --build
+```
+
+Open:
+
+- Chat page: `http://localhost:3000/`
+- Admin page: `http://localhost:3000/admin`
+- Backend API base: `http://localhost:8000/api`
+
+Notes:
+
+- Backend runs via Daphne on port `8000` (HTTP + WebSocket on same port).
+- Compose sets frontend runtime env vars to use `localhost:8000`.
+- PostgreSQL is initialized with `pgvector` extension automatically on first boot.
+
+Stop stack:
+
+```bash
+docker compose down
+```
+
 ## Backend Setup
 
 ```bash

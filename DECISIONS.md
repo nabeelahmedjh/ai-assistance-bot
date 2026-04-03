@@ -5,3 +5,5 @@
 - Chose to expose a structured chat payload (`answer`, `citations`, `next_step`, `intent`, `handoff`) instead of plain text to make UI rendering and agent workflows easier.
 - Chose to validate WebSocket infrastructure first with a minimal browser test page, then implement the full Next.js widget.
 - Chose WebSocket token streaming with a controlled minimum duration so users perceive real-time response progress rather than instant full-text swaps.
+- added docker based deployment setup and docker componse for easier setup for the solution
+- really enjoyed working on this project, although most of the regarding injestion, embedding, and vector store were new to me and AI helped a tone in completion of this project
